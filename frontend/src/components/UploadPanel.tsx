@@ -17,8 +17,11 @@ export default function UploadPanel({ onSuccess }: Props) {
   const [file, setFile] = useState<File | null>(null)
   const [text, setText] = useState('')
   const [url, setUrl] = useState('')
+  const [dismissedError, setDismissedError] = useState<string | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
   const { ingest, loading, error } = useIngest()
+
+  const showError = error && error !== dismissedError
 
   const canSubmit =
     !loading &&
@@ -26,8 +29,9 @@ export default function UploadPanel({ onSuccess }: Props) {
       (mode === 'text' && text.trim().length > 0) ||
       (mode === 'url' && url.trim().length > 0))
 
-  async function handleSubmit(e: React.FormEvent) {
+  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault()
+    setDismissedError(null)
     const data: File | string =
       mode === 'file' ? (file as File) : mode === 'text' ? text : url
     try {
@@ -39,23 +43,25 @@ export default function UploadPanel({ onSuccess }: Props) {
   }
 
   return (
-    <div className="max-w-xl mx-auto mt-16 p-6 bg-white rounded-2xl shadow-sm border border-gray-200">
-      <h1 className="text-2xl font-semibold text-gray-900 mb-1">Paper Summarizer</h1>
-      <p className="text-sm text-gray-500 mb-6">
-        Upload a PDF, paste text, or provide a URL to get started.
-      </p>
+    <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 sm:p-8">
+      <div className="mb-6">
+        <h2 className="text-xl font-semibold text-slate-900">Analyze a document</h2>
+        <p className="text-sm text-slate-500 mt-1">
+          Upload a PDF, paste text, or provide a URL to start chatting.
+        </p>
+      </div>
 
       {/* Tab switcher */}
-      <div className="flex gap-1 mb-6 bg-gray-100 p-1 rounded-lg">
+      <div className="flex border-b border-slate-200 mb-6 -mx-1 px-1">
         {TABS.map(tab => (
           <button
             key={tab.id}
             type="button"
             onClick={() => setMode(tab.id)}
-            className={`flex-1 py-2 text-sm font-medium rounded-md transition-colors ${
+            className={`px-4 py-2.5 text-sm font-medium border-b-2 -mb-px transition-colors ${
               mode === tab.id
-                ? 'bg-white text-gray-900 shadow-sm'
-                : 'text-gray-500 hover:text-gray-700'
+                ? 'border-indigo-600 text-indigo-600'
+                : 'border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300'
             }`}
           >
             {tab.label}
@@ -67,15 +73,24 @@ export default function UploadPanel({ onSuccess }: Props) {
         {mode === 'file' && (
           <div
             onClick={() => fileInputRef.current?.click()}
-            className="border-2 border-dashed border-gray-300 rounded-xl p-10 text-center cursor-pointer hover:border-gray-400 transition-colors"
+            className="group border-2 border-dashed rounded-xl p-8 text-center cursor-pointer transition-colors border-slate-300 hover:border-indigo-400 hover:bg-indigo-50/40"
           >
             {file ? (
-              <p className="text-sm text-gray-700 font-medium">{file.name}</p>
+              <div className="flex flex-col items-center gap-2">
+                <svg className="w-8 h-8 text-indigo-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                </svg>
+                <p className="text-sm font-medium text-slate-700 truncate max-w-xs">{file.name}</p>
+                <p className="text-xs text-slate-400">Click to change file</p>
+              </div>
             ) : (
-              <>
-                <p className="text-sm text-gray-500">Click to upload a PDF</p>
-                <p className="text-xs text-gray-400 mt-1">PDF files only</p>
-              </>
+              <div className="flex flex-col items-center gap-2">
+                <svg className="w-10 h-10 text-slate-300 group-hover:text-indigo-400 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5" />
+                </svg>
+                <p className="text-sm font-medium text-slate-600">Click to upload a PDF</p>
+                <p className="text-xs text-slate-400">PDF files only</p>
+              </div>
             )}
             <input
               ref={fileInputRef}
@@ -93,28 +108,54 @@ export default function UploadPanel({ onSuccess }: Props) {
             onChange={e => setText(e.target.value)}
             placeholder="Paste your text here…"
             rows={8}
-            className="w-full rounded-xl border border-gray-300 px-4 py-3 text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent resize-none"
+            className="w-full rounded-xl border border-slate-300 px-4 py-3 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent resize-none transition"
           />
         )}
 
         {mode === 'url' && (
-          <input
-            type="url"
-            value={url}
-            onChange={e => setUrl(e.target.value)}
-            placeholder="https://example.com/paper"
-            className="w-full rounded-xl border border-gray-300 px-4 py-3 text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent"
-          />
+          <div className="space-y-1">
+            <input
+              type="url"
+              value={url}
+              onChange={e => setUrl(e.target.value)}
+              placeholder="https://example.com/paper"
+              className="w-full rounded-xl border border-slate-300 px-4 py-3 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition"
+            />
+            <p className="text-xs text-slate-400 px-1">Publicly accessible URLs only</p>
+          </div>
         )}
 
-        {error && <p className="text-sm text-red-500">{error}</p>}
+        {showError && (
+          <div className="flex items-start gap-2 bg-red-50 border border-red-200 text-red-700 rounded-lg px-4 py-3 text-sm">
+            <span className="flex-1">{error}</span>
+            <button
+              type="button"
+              onClick={() => setDismissedError(error)}
+              className="shrink-0 mt-0.5 text-red-400 hover:text-red-600 transition-colors"
+            >
+              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+          </div>
+        )}
 
         <button
           type="submit"
           disabled={!canSubmit}
-          className="w-full py-3 rounded-xl bg-gray-900 text-white text-sm font-medium hover:bg-gray-800 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+          className="w-full flex items-center justify-center gap-2 py-3 rounded-xl bg-indigo-600 text-white text-sm font-medium hover:bg-indigo-700 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
         >
-          {loading ? 'Analyzing…' : 'Analyze'}
+          {loading ? (
+            <>
+              <svg className="animate-spin h-4 w-4" fill="none" viewBox="0 0 24 24">
+                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+              </svg>
+              Analyzing…
+            </>
+          ) : (
+            'Analyze'
+          )}
         </button>
       </form>
     </div>

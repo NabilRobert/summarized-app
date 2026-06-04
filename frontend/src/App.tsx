@@ -12,14 +12,24 @@ export default function App() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="max-w-2xl mx-auto px-4 py-8">
+    <div className="h-screen flex flex-col bg-slate-50">
+      <header className="shrink-0 bg-white border-b border-slate-200">
+        <div className="max-w-2xl mx-auto px-4 h-14 flex items-center">
+          <span className="font-semibold text-slate-900 tracking-tight">
+            Paper Summarizer
+          </span>
+        </div>
+      </header>
+
+      <main className="flex-1 overflow-hidden max-w-2xl w-full mx-auto px-4 flex flex-col">
         {!sessionId ? (
-          <UploadPanel onSuccess={handleIngestSuccess} />
+          <div className="my-auto py-8">
+            <UploadPanel onSuccess={handleIngestSuccess} />
+          </div>
         ) : (
           <ChatWindow sessionId={sessionId} greeting={greeting ?? ''} />
         )}
-      </div>
+      </main>
     </div>
   )
 }
