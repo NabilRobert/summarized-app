@@ -12,12 +12,14 @@ export default function App() {
   }
 
   return (
-    <main>
-      {!sessionId ? (
-        <UploadPanel onSuccess={handleIngestSuccess} />
-      ) : (
-        <ChatWindow sessionId={sessionId} greeting={greeting ?? ''} />
-      )}
-    </main>
+    <div className="min-h-screen bg-gray-50">
+      <div className="max-w-2xl mx-auto px-4 py-8">
+        {!sessionId ? (
+          <UploadPanel onSuccess={handleIngestSuccess} />
+        ) : (
+          <ChatWindow sessionId={sessionId} greeting={greeting ?? ''} />
+        )}
+      </div>
+    </div>
   )
 }
