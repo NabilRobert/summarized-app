@@ -7,7 +7,10 @@ from openai import OpenAI
 
 load_dotenv()
 
-_client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+_client = OpenAI(
+    base_url=os.getenv("SUMOPOD_BASE_URL"),
+    api_key=os.getenv("SUMOPOD_API_KEY"),
+)
 
 _CHUNK_SIZE = int(os.getenv("CHUNK_SIZE", "500"))
 _CHUNK_OVERLAP = int(os.getenv("CHUNK_OVERLAP", "50"))
