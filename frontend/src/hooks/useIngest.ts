@@ -1,26 +1,35 @@
 import { useState } from 'react'
+import axios from 'axios'
 import client from '../api/client'
-import type { IngestResponse } from '../types'
+import type { IngestResponse, InputMode } from '../types'
 
 export function useIngest() {
-  const [sessionId, setSessionId] = useState<string | null>(null)
-  const [greeting, setGreeting] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
-  async function ingest(payload: FormData) {
+  async function ingest(mode: InputMode, data: File | string): Promise<IngestResponse> {
     setLoading(true)
     setError(null)
     try {
-      const { data } = await client.post<IngestResponse>('/ingest', payload)
-      setSessionId(data.session_id)
-      setGreeting(data.message)
+      const formData = new FormData()
+      if (mode === 'file') formData.append('file', data as File)
+      else if (mode === 'text') formData.append('text', data as string)
+      else formData.append('url', data as string)
+
+      const { data: response } = await client.post<IngestResponse>('/ingest', formData)
+      return response
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : 'Ingest failed')
+      const message = axios.isAxiosError(err)
+        ? (err.response?.data?.detail ?? err.message)
+        : err instanceof Error
+          ? err.message
+          : 'Ingest failed'
+      setError(message)
+      throw new Error(message)
     } finally {
       setLoading(false)
     }
   }
 
-  return { ingest, sessionId, greeting, loading, error }
+  return { ingest, loading, error }
 }

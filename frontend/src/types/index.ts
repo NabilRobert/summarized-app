@@ -3,6 +3,8 @@ export interface IngestResponse {
   message: string
 }
 
+export type InputMode = 'file' | 'text' | 'url'
+
 export interface ChatMessage {
   role: 'user' | 'assistant'
   content: string
