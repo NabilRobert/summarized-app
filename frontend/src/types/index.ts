@@ -5,7 +5,7 @@ export interface IngestResponse {
 
 export type InputMode = 'file' | 'text' | 'url'
 
-export interface ChatMessage {
+export interface Message {
   role: 'user' | 'assistant'
   content: string
 }

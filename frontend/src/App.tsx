@@ -16,7 +16,7 @@ export default function App() {
       {!sessionId ? (
         <UploadPanel onSuccess={handleIngestSuccess} />
       ) : (
-        <ChatWindow sessionId={sessionId} greeting={greeting} />
+        <ChatWindow sessionId={sessionId} greeting={greeting ?? ''} />
       )}
     </main>
   )
