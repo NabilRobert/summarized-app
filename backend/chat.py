@@ -23,12 +23,16 @@ def _chat(messages: list[dict]) -> str:
 
 
 def _build_system_prompt(doc_name: str | None, rolling_summary: str) -> str:
+    doc_label = f'"{doc_name}"' if doc_name else "the uploaded document"
     parts = [
-        "You are a helpful assistant that answers questions about academic papers and documents.",
-        "Answer based on the provided context. If the answer is not in the context, say so clearly.",
+        f"You are a document assistant. Your sole purpose is to answer questions about {doc_label}.",
+        "Rules you must follow without exception:",
+        "1. Only answer questions that can be answered using the provided document context.",
+        "2. If the question is not related to the document, respond with exactly: \"I can only answer questions about this document.\"",
+        "3. Do not use any outside knowledge, even if you are confident in it.",
+        "4. Do not engage in general conversation, creative tasks, coding help, or any topic outside the document.",
+        "5. If the context does not contain enough information to answer, say so clearly and quote the relevant limitation.",
     ]
-    if doc_name:
-        parts.append(f"Document: {doc_name}")
     if rolling_summary:
         parts.append(f"\nSummary of earlier conversation:\n{rolling_summary}")
     return "\n".join(parts)

@@ -1,0 +1,34 @@
+# Environment variables — never commit secrets
+.env
+.env.*
+!.env.example
+*.pdf
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.Python
+*.egg-info/
+dist/
+build/
+.venv/
+venv/
+env/
+
+# Frontend build output
+frontend/dist/
+frontend/node_modules/
+
+# Vite / TS cache
+frontend/.tsbuildinfo
+frontend/tsconfig.tsbuildinfo
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.swp
+*.swo
