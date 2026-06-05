@@ -20,7 +20,9 @@ export function useIngest() {
       return response
     } catch (err: unknown) {
       const message = axios.isAxiosError(err)
-        ? (err.response?.data?.detail ?? err.message)
+        ? err.response?.status === 502
+          ? 'Cannot reach the backend. Make sure the server is running on port 8000.'
+          : (err.response?.data?.detail ?? err.message)
         : err instanceof Error
           ? err.message
           : 'Ingest failed'

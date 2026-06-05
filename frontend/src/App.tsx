@@ -16,7 +16,7 @@ export default function App() {
       <header className="shrink-0 bg-white border-b border-slate-200">
         <div className="max-w-2xl mx-auto px-4 h-14 flex items-center">
           <span className="font-semibold text-slate-900 tracking-tight">
-            Paper Summarizer
+            Summarized V1
           </span>
         </div>
       </header>

@@ -20,7 +20,9 @@ export function useChat() {
       setMessages(prev => [...prev, { role: 'assistant', content: data.reply }])
     } catch (err: unknown) {
       const msg = axios.isAxiosError(err)
-        ? (err.response?.data?.detail ?? err.message)
+        ? err.response?.status === 502
+          ? 'Cannot reach the backend. Make sure the server is running on port 8000.'
+          : (err.response?.data?.detail ?? err.message)
         : err instanceof Error
           ? err.message
           : 'Chat failed'
