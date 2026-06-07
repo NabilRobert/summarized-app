@@ -35,15 +35,18 @@ export async function extractFromUrl(url: string): Promise<string> {
     )
   }
 
+  const buffer = Buffer.from(await res.arrayBuffer())
+
+  // PDF magic bytes (%PDF) are the ground truth — more reliable than
+  // Content-Type or URL extension (arXiv and others omit the header).
   const contentType = res.headers.get('content-type') ?? ''
-  const isPdf = contentType.includes('application/pdf') || url.split('?')[0].toLowerCase().endsWith('.pdf')
+  const isPdf =
+    contentType.includes('application/pdf') ||
+    (buffer.length >= 4 && buffer.subarray(0, 4).toString('ascii') === '%PDF')
 
-  if (isPdf) {
-    const buffer = Buffer.from(await res.arrayBuffer())
-    return extractFromPdf(buffer)
-  }
+  if (isPdf) return extractFromPdf(buffer)
 
-  const html = await res.text()
+  const html = buffer.toString('utf-8')
   const $ = cheerio.load(html)
   $('script, style, noscript').remove()
   const text = $('body').text().replace(/\s+/g, ' ').trim()
