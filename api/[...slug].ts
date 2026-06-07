@@ -63,11 +63,9 @@ async function handleChat(req: VercelRequest, res: VercelResponse): Promise<void
 }
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
-  const slug = Array.isArray(req.query.slug)
-    ? req.query.slug.join('/')
-    : (req.query.slug ?? '')
+  const action = (req.url ?? '').split('?')[0].split('/').filter(Boolean).pop() ?? ''
 
-  if (slug === 'ingest') return handleIngest(req, res)
-  if (slug === 'chat')   return handleChat(req, res)
-  return res.status(404).json({ detail: 'Not found' })
+  if (action === 'ingest') return handleIngest(req, res)
+  if (action === 'chat')   return handleChat(req, res)
+  return res.status(404).json({ detail: `Route not found: ${action}` })
 }
