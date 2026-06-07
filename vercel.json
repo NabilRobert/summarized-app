@@ -3,8 +3,6 @@
   "outputDirectory": "frontend/dist",
   "devCommand": "cd frontend && npm run dev",
   "rewrites": [
-    { "source": "/ingest", "destination": "/api/ingest" },
-    { "source": "/chat",   "destination": "/api/chat"   },
     { "source": "/((?!api/).*)", "destination": "/index.html" }
   ]
 }
