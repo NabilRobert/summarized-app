@@ -12,16 +12,40 @@ export async function extractFromPdf(buffer: Buffer): Promise<string> {
   return text
 }
 
+const URL_TIMEOUT_MS  = parseInt(process.env.URL_TIMEOUT_MS  ?? '10000', 10)
+const MIN_CONTENT_LEN = parseInt(process.env.MIN_CONTENT_LEN ?? '200',   10)
+
 export async function extractFromUrl(url: string): Promise<string> {
-  const res = await fetch(url, {
-    headers: { 'User-Agent': 'Mozilla/5.0 (compatible; Summarizer/1.0)' },
-  })
-  if (!res.ok) throw new Error(`Failed to fetch URL: ${res.statusText}`)
+  let res: Awaited<ReturnType<typeof fetch>>
+
+  try {
+    res = await fetch(url, {
+      headers: { 'User-Agent': 'Mozilla/5.0 (compatible; Summarizer/1.0)' },
+      timeout: URL_TIMEOUT_MS,
+    })
+  } catch (err) {
+    throw new Error(
+      `Could not reach "${url}". Check that the URL is correct and publicly accessible.`
+    )
+  }
+
+  if (!res.ok) {
+    throw new Error(
+      `"${url}" returned ${res.status} ${res.statusText}. Make sure the link is publicly accessible.`
+    )
+  }
+
   const html = await res.text()
   const $ = cheerio.load(html)
   $('script, style, noscript').remove()
   const text = $('body').text().replace(/\s+/g, ' ').trim()
-  if (!text) throw new Error('URL extraction returned empty content')
+
+  if (text.length < MIN_CONTENT_LEN) {
+    throw new Error(
+      `Not enough readable content found at "${url}". The page may require a login, block bots, or be mostly JavaScript-rendered.`
+    )
+  }
+
   return text
 }
 
