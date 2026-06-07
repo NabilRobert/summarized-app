@@ -1,6 +1,10 @@
 {
   "installCommand": "npm ci",
   "buildCommand": "cd frontend && npm install && npm run build",
-  "outputDirectory": "frontend/dist",
-  "devCommand": "cd frontend && npm run dev"
+  "outputDirectory": "dist",
+  "devCommand": "cd frontend && npm run dev",
+  "functions": {
+    "api/ingest.ts": { "maxDuration": 60 },
+    "api/chat.ts": { "maxDuration": 60 }
+  }
 }
