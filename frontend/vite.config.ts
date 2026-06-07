@@ -8,9 +8,5 @@ export default defineConfig({
   server: {
     port: 5173,
     strictPort: true,
-    proxy: {
-      '/ingest': { target: 'http://localhost:8000', changeOrigin: true },
-      '/chat': { target: 'http://localhost:8000', changeOrigin: true },
-    },
   },
 })

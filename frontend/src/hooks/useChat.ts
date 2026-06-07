@@ -21,7 +21,7 @@ export function useChat() {
     } catch (err: unknown) {
       const msg = axios.isAxiosError(err)
         ? err.response?.status === 502
-          ? 'Cannot reach the backend. Make sure the server is running on port 8000.'
+          ? 'Cannot reach the backend. Run `vercel dev` from the project root.'
           : (err.response?.data?.detail ?? err.message)
         : err instanceof Error
           ? err.message
