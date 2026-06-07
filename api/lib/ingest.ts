@@ -35,6 +35,14 @@ export async function extractFromUrl(url: string): Promise<string> {
     )
   }
 
+  const contentType = res.headers.get('content-type') ?? ''
+  const isPdf = contentType.includes('application/pdf') || url.split('?')[0].toLowerCase().endsWith('.pdf')
+
+  if (isPdf) {
+    const buffer = Buffer.from(await res.arrayBuffer())
+    return extractFromPdf(buffer)
+  }
+
   const html = await res.text()
   const $ = cheerio.load(html)
   $('script, style, noscript').remove()
