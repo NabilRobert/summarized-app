@@ -4,7 +4,7 @@ import { readFileSync } from 'fs'
 import { tmpdir } from 'os'
 import { extractFromPdf, extractFromUrl, extractFromText } from './lib/ingest'
 import { chunkText, buildVectorStore } from './lib/embeddings'
-import { createSession, getSession } from './lib/sessionStore'
+import { createSession, getSession, updateSession } from './lib/sessionStore'
 import { getReply } from './lib/chat'
 
 async function handleIngest(req: VercelRequest, res: VercelResponse): Promise<void> {
@@ -36,7 +36,7 @@ async function handleIngest(req: VercelRequest, res: VercelResponse): Promise<vo
   try {
     const chunks      = await chunkText(rawText)
     const vectorStore = await buildVectorStore(chunks)
-    const sessionId   = createSession({ docName, vectorStore, chatHistory: [], rollingSummary: '' })
+    const sessionId   = await createSession({ docName, vectorStore, chatHistory: [], rollingSummary: '' })
     res.status(200).json({ session_id: sessionId, message: `I've analyzed ${docName}. What do you need to know?` })
   } catch (err) {
     res.status(500).json({ detail: `Indexing failed: ${err instanceof Error ? err.message : String(err)}` })
@@ -51,11 +51,12 @@ async function handleChat(req: VercelRequest, res: VercelResponse): Promise<void
     res.status(422).json({ detail: 'session_id and message are required' }); return
   }
 
-  const session = getSession(session_id)
+  const session = await getSession(session_id)
   if (!session) { res.status(404).json({ detail: 'Session not found or expired.' }); return }
 
   try {
     const reply = await getReply(session, message)
+    await updateSession(session_id, session.chatHistory, session.rollingSummary)
     res.status(200).json({ reply })
   } catch (err) {
     res.status(500).json({ detail: err instanceof Error ? err.message : 'Chat failed' })

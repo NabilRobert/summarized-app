@@ -7,7 +7,7 @@ const CHUNK_OVERLAP = parseInt(process.env.CHUNK_OVERLAP ?? '50',  10)
 const TOP_K         = parseInt(process.env.RETRIEVAL_TOP_K ?? '4', 10)
 const EMBED_MODEL   = process.env.EMBEDDING_MODEL ?? 'text-embedding-3-small'
 
-function getEmbeddings(): OpenAIEmbeddings {
+export function getEmbeddings(): OpenAIEmbeddings {
   return new OpenAIEmbeddings({
     model: EMBED_MODEL,
     apiKey: process.env.SUMOPOD_API_KEY ?? '',
