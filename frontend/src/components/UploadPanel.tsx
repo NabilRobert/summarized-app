@@ -18,6 +18,9 @@ export default function UploadPanel({ onSuccess }: Props) {
   const [text, setText] = useState('')
   const [url, setUrl] = useState('')
   const [dismissedError, setDismissedError] = useState<string | null>(null)
+  const [sizeError, setSizeError] = useState<string | null>(null)
+
+  const MAX_FILE_BYTES = 4 * 1024 * 1024 // 4 MB — Vercel hard limit is 4.5 MB
   const fileInputRef = useRef<HTMLInputElement>(null)
   const { ingest, loading, error } = useIngest()
 
@@ -25,6 +28,7 @@ export default function UploadPanel({ onSuccess }: Props) {
 
   const canSubmit =
     !loading &&
+    !sizeError &&
     ((mode === 'file' && file !== null) ||
       (mode === 'text' && text.trim().length > 0) ||
       (mode === 'url' && url.trim().length > 0))
@@ -89,7 +93,7 @@ export default function UploadPanel({ onSuccess }: Props) {
                   <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5" />
                 </svg>
                 <p className="text-sm font-medium text-slate-600">Click to upload a PDF</p>
-                <p className="text-xs text-slate-400">PDF files only</p>
+                <p className="text-xs text-slate-400">PDF files only · max 4 MB</p>
               </div>
             )}
             <input
@@ -97,7 +101,16 @@ export default function UploadPanel({ onSuccess }: Props) {
               type="file"
               accept=".pdf"
               className="hidden"
-              onChange={e => setFile(e.target.files?.[0] ?? null)}
+              onChange={e => {
+                const chosen = e.target.files?.[0] ?? null
+                if (chosen && chosen.size > MAX_FILE_BYTES) {
+                  setSizeError(`File is ${(chosen.size / 1024 / 1024).toFixed(1)} MB — must be under 4 MB. Try a smaller PDF or paste the text instead.`)
+                  setFile(null)
+                } else {
+                  setSizeError(null)
+                  setFile(chosen)
+                }
+              }}
             />
           </div>
         )}
@@ -122,6 +135,12 @@ export default function UploadPanel({ onSuccess }: Props) {
               className="w-full rounded-xl border border-slate-300 px-4 py-3 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition"
             />
             <p className="text-xs text-slate-400 px-1">Publicly accessible URLs only</p>
+          </div>
+        )}
+
+        {sizeError && (
+          <div className="flex items-start gap-2 bg-red-50 border border-red-200 text-red-700 rounded-lg px-4 py-3 text-sm">
+            <span className="flex-1">{sizeError}</span>
           </div>
         )}
 

@@ -22,6 +22,8 @@ export function useIngest() {
       const message = axios.isAxiosError(err)
         ? err.response?.status === 502
           ? 'Cannot reach the backend. Run `vercel dev` from the project root.'
+          : err.response?.status === 413
+          ? 'File too large. Vercel limits uploads to 4.5 MB — use a smaller PDF or paste the text instead.'
           : (err.response?.data?.detail ?? err.message)
         : err instanceof Error
           ? err.message
