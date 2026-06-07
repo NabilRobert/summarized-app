@@ -17,9 +17,12 @@ build/
 venv/
 env/
 
+# Node modules
+node_modules/
+frontend/node_modules/
+
 # Frontend build output
 frontend/dist/
-frontend/node_modules/
 
 # Vite / TS cache
 frontend/.tsbuildinfo
